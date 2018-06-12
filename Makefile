@@ -8,5 +8,5 @@ clean:
 	rm -f $(TARGET)
 
 $(TARGET):
-	g++ -O3 $(INCS) $(LIBS) -std=c++11 -o $(TARGET) $(TARGET).cpp
+	g++  $(TARGET).cpp -o $(TARGET) -O3 $(INCS) $(LIBS) -std=c++11 
 
