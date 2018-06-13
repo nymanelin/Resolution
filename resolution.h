@@ -1,6 +1,6 @@
 
 //#define NH 3
-#define NC 6
+#define NC 6 // Number of Centrality bin
 
 //https://aliceinfo.cern.ch/Notes/sites/aliceinfo.cern.ch.Notes/files/notes/analysis/jonderwa/2014-Apr-29-analysis_note-analysis_note_event_plane_calibration.pdf
 //https://www.hepdata.net/record/78365
