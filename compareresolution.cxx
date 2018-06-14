@@ -1,6 +1,6 @@
 #define NFiles 1
 
-compareresolution() {
+void compareresolution() {
 
   TFile *f1[NFiles];
 //  f1[0]  = new TFile("normal_highpt.root");
@@ -10,7 +10,8 @@ compareresolution() {
 //  f1[4]  = new TFile("normal_lowerv2_45.root");
 //  f1[5]  = new TFile("normal_lowerv2_50.root");
 //  f1[6]  = new TFile("normal_lowerv2_45_true.root"); 
-  f1[0]  = new TFile("normal_lowerv2_35.root");
+//  f1[0]  = new TFile("normal_lowerv2_35.root");
+  f1[0] = new TFile("normal.root");
 
   TFile *reference502 = new TFile("v2_res_V0AC_alice5TeVPbPb_alex.root");
 

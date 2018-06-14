@@ -18,7 +18,7 @@ static double CentBins[NC+3] = {0,5,10,20,30,40,50,60,70};
 void SubtractBg(TH1D *h, double bg, double ebg) ;
 
 
-normalize() {
+void normalize() {
 
   double pi = TMath::Pi();
   string name;

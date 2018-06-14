@@ -56,7 +56,7 @@ int main(int argc, char **pargv){
   pff->Close();
   delete pff;
 
-  // PDF for Pure flow, High_pT flow, and Jet
+  // PDF for Pure flow
   TF1 *pdf = new TF1("df",
       "[0]*(1+2*[1]*cos(x-[5])+2*[2]*cos(2*(x-[6]))+2*[3]*cos(3*(x-[7]))+2*[4]*cos(4*(x-[8])))",-pi,pi);
   pdf->SetParameter(0,100.0); // const/norm 
@@ -65,9 +65,9 @@ int main(int argc, char **pargv){
   // Random #
   TRandom *prng = new TRandom(seed);
 
-  // Declear histograms...
+  // Declare histograms...
   // 
-  for(uint i = 0; i < R_COUNT; ++i){ // R_COUNT is num of detectors
+  for(uint i = 0; i < R_COUNT; ++i){ // R_COUNT is the number of detectors
     for(uint j = 0; j < NC; ++j){
       pah[i][j] = new TH1D(Form("h_res_%s_a%02u",presn[i],j),"h_res",1024,-1.5,1.5);    // resolution factor for detector i, i-a
       pbh[i][j] = new TH1D(Form("h_res_%s_b%02u",presn[i],j),"h_res",1024,-1.5,1.5);    // resolution factor for detector i, i-b
@@ -83,7 +83,7 @@ int main(int argc, char **pargv){
   }
 
   // How many particles we want to put into the simulation.
-  // Create multiplicity(eta) distribution & integrate ---------------
+  // Create multiplicity (eta) distribution & integrate ---------------
   TGraph *pgr_nch[D_COUNT];
   for(uint i = 0; i < D_COUNT; ++i)
     pgr_nch[i] = new TGraph(NC);
@@ -126,7 +126,7 @@ int main(int argc, char **pargv){
     //Q-vectors -----------------------------------
     double trueevp = pdf->GetParameter(6);
 
-    //containers of Pure flow tracks and jet tracks
+    //containers of Pure flow tracks and jet tracks. Do we use jet tracks?
     std::vector <double> trackphi[D_COUNT];
     std::vector <double> tracketa[D_COUNT];
     std::vector <double> jettrackphi[D_COUNT];
@@ -156,10 +156,10 @@ int main(int argc, char **pargv){
       Qsd[s] = Qa2/TComplex::Abs(Qa2);
     }
 
-    //Calculate Evp using Q Vectors
+    //Calculate Event plane using Q Vectors
 
     for (uint s = 0; s < R_COUNT; ++s) {
-      double recoevp = TMath::ATan2(Qsd[s].Im(), Qsd[s].Re())/2;
+      double recoevp = TMath::ATan2(Qsd[s].Im(), Qsd[s].Re())/2; // What is recoevp
       double evpdiff = trueevp - recoevp;
 
       evph[s][cid]->Fill(recoevp);
@@ -184,6 +184,7 @@ int main(int argc, char **pargv){
       pah[R_V0C][cid]->Fill(ab.Re());
       pbh[R_V0C][cid]->Fill(ac.Re());
       pch[R_V0C][cid]->Fill(bc.Re());*/
+    // What does this part do?
     ab = Qsd[D_V0A]*TComplex::Conjugate(Qsd[D_TPC_ETAA]);
     ac = Qsd[D_V0A]*TComplex::Conjugate(Qsd[D_TPC_ETAC]);
     bc = Qsd[D_TPC_ETAA]*TComplex::Conjugate(Qsd[D_TPC_ETAC]);
@@ -221,6 +222,7 @@ int main(int argc, char **pargv){
   TFile *pfo = new TFile(argc > 3?pargv[3]:"results.root","recreate");
   pfo->cd();
 
+  // What does this part do?
   for(uint i = 0; i < R_COUNT; ++i){
     for(uint j = 0; j < NC; ++j){
       //double a[2] = {pah[i]->GetMean(),pah[i]->GetMeanError()};
