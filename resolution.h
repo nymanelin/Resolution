@@ -69,6 +69,11 @@ TH2D *evpcorrvsdet2d[NC];
 TH1D *evpdifference[R_COUNT][NC];
 TH2D *jetcorr2d[R_COUNT][NC];
 TH1D *h_jetdirection[R_COUNT][NC][2];
+
+TProfile *h_v2[R_COUNT];
+TProfile *h_resolution[R_COUNT];
+TH1D *p_v2[R_COUNT];
+TH1D *p_reso[R_COUNT];
 //TH2D *samecorr2dtrue[R_COUNT][NC][6];
 TH2D *samecorr2d[R_COUNT][NC][6][6];
 
