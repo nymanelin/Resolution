@@ -57,5 +57,10 @@ void drawV_2() {
 	leg2->AddEntry(p_v2, "Corrected v2");
 	leg2->AddEntry(true_v2, "True v2 (input)");
 	leg2->Draw();
-
+	
+	TCanvas *ca= new TCanvas("ca", "a");
+	h_v2_V0A->Draw();
+	TH1D *h = h_v2_V0A->ProjectionX();
+	h->SetLineColor(kGreen);
+	h->Draw("same");
 }
