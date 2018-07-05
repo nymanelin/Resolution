@@ -16,7 +16,12 @@ typedef unsigned int uint;
 #define N_VN 2  // Number of Harmonics n=2, 3
 
 
-//void resolution(){
+TProfile *t_v2_obs[R_COUNT];
+TProfile *t_reso_true[R_COUNT];
+TH1D *h_reso_true[R_COUNT][NC];
+TH1D *p_v2_corrtrue[R_COUNT];
+
+
 int main(int argc, char **pargv){
   uint seed = argc > 1?atol(pargv[1]):1000;
   uint evtc = argc > 2?atol(pargv[2]):1000;
@@ -68,14 +73,16 @@ int main(int argc, char **pargv){
       evpdifference[i][j] = new TH1D(Form("h_evpdiff_%s_c%02u", presn[i], j), Form("Event Plane Difference %s, %.0f-%.0fC", presn[i], CentBins[j], CentBins[j+1]), 128, -4, 4); 
       evpdifference[i][j]->GetXaxis()->SetTitle("Event plane Difference");
       evpdifference[i][j]->GetYaxis()->SetTitle("N Events");
+      
+      h_reso_true[i][j] = new TH1D(Form("h_reso_true%s_%02u", presn[i], j), Form("h_reso_true %s, %.0f-%.0fC", presn[i], CentBins[j], CentBins[j+1]), 128, -0.14, 0.14);
     
     }
     
-    h_v2[i] = new TProfile(Form("h_v2_%s", presn[i]), "h_v2", NC+2, CentBins);
-    h_resolution[i] = new TProfile(Form("h_resolution_%s", presn[i]), "h_resolution", NC+2, CentBins);
+    t_v2_obs[i] = new TProfile(Form("t_v2_obs_%s", presn[i]), Form("t_v2_obs_%s", presn[i]), NC+2, CentBins);
+    t_reso_true[i] = new TProfile(Form("t_reso_true_%s", presn[i]), Form("t_reso_true_%s", presn[i]), NC+2, CentBins);
   }
 
-  TProfile *true_v2 = new TProfile("true_v2", "true_v2", NC+2, CentBins);
+  TProfile *t_v2_true = new TProfile("t_v2_true", "t_v2_true", NC+2, CentBins);
 
   // How many particles we want to put into the simulation.
   // Create multiplicity (eta) distribution & integrate ---------------
@@ -100,7 +107,7 @@ int main(int argc, char **pargv){
 
     double cent = prng->Uniform(0,50.0);
     // adding vn..
-    pdf->SetParameter(2,pgr_v[0]->Eval(cent) ); //v2 0.65 is for v2 weightening because of the pt distribution in the detectors.
+    pdf->SetParameter(2,pgr_v[0]->Eval(cent)*0.65); //v2 0.65 is for v2 weightening because of the pt distribution in the detectors.
     pdf->SetParameter(3,pgr_v[1]->Eval(cent)); //v3
     pdf->SetParameter(4,0.01);//pgr_v[2]->Eval(cent)); //v4
     // producing symmetric angles
@@ -117,7 +124,7 @@ int main(int argc, char **pargv){
     //Q-vectors Only for 2nd order-----------------------------------
     double trueevp = pdf->GetParameter(6);
     
-    true_v2->Fill(cent, pdf->GetParameter(2));
+    t_v2_true->Fill(cent, pdf->GetParameter(2)/0.65);
 
     //containers of Pure flow tracks and jet tracks
     std::vector <double> trackphi[D_COUNT];
@@ -146,10 +153,12 @@ int main(int argc, char **pargv){
       evph[s][cid]->Fill(recoevp); // reconstructed EP
       evpdifference[s][cid]->Fill(evpdiff); // for resolution
       
+      t_reso_true[s]->Fill(cent, TMath::Cos(2*evpdiff));
+      h_reso_true[s][cid]->Fill(TMath::Cos(2*evpdiff));
+      
       int ntracks = trackphi[s].size();
       for (uint i = 0; i < ntracks; ++i) {
-	h_v2[s]->Fill(cent, TMath::Cos(2*(trackphi[s][i]-recoevp)));
-        h_resolution[s]->Fill(cent, TMath::Cos(2*evpdiff));
+	t_v2_obs[s]->Fill(cent, TMath::Cos(2*(trackphi[s][i]-recoevp)));
       }
     }
 
@@ -177,12 +186,6 @@ int main(int argc, char **pargv){
 
   }
 
-  for (int i=0; i<R_COUNT; i++) {
-    p_v2[i] = h_v2[i]->ProjectionX(Form("p_v2_corr_%s", presn[i]));
-    p_reso[i] = h_resolution[i]->ProjectionX("p_reso");
-    p_v2[i]->Divide(p_reso[i]);
-  }
-
   // cleaning up the variables
   for(uint i = 0; i < D_COUNT; ++i)
     delete pgr_nch[i];
@@ -196,12 +199,17 @@ int main(int argc, char **pargv){
   TFile *pfo = new TFile(argc > 3?pargv[3]:"results.root","recreate");
   pfo->cd();
 
-  true_v2->Write();
+  t_v2_true->Write();
+
+  delete t_v2_true;
 
   for(uint i = 0; i < R_COUNT; ++i){
-    h_v2[i]->Write();
-    h_resolution[i]->Write();
-    p_v2[i]->Write();
+    t_v2_obs[i]->Write();
+    t_reso_true[i]->Write();
+
+    delete t_v2_obs[i];
+    delete t_reso_true[i];
+
     for(uint j = 0; j < NC; ++j){
       pah[i][j]->Write(Form("h_%s_a%02u",presn[i],j));
       pbh[i][j]->Write(Form("h_%s_b%02u",presn[i],j));
@@ -210,12 +218,15 @@ int main(int argc, char **pargv){
       evph[i][j]->Write(Form("h_evp_%s_%02u", presn[i], j));
       evpdifference[i][j]->Write(Form("h_evpdiff_%s_%02u", presn[i], j));
     
+      h_reso_true[i][j]->Write(Form("h_reso_true_%s_%02u", presn[i], j));
 
       delete pah[i][j];
       delete pbh[i][j];
       delete pch[i][j];
       delete evph[i][j];
       delete evpdifference[i][j];
+      delete h_reso_true[i][j];
+
     }
   }
 
