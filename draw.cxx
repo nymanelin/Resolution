@@ -119,4 +119,23 @@ void draw() {
 		leg2->Draw();
 	}
 
+	TCanvas *c3 = new TCanvas("c3", "True Resolution");
+
+	t_reso_true[2]->SetLineColor(kRed);
+	t_reso_true[2]->Draw();
+	t_reso_true[2]->SetTitle("True Resolution");
+
+	t_reso_true[0]->SetLineColor(kBlue);
+	t_reso_true[0]->Draw("same");
+
+	t_reso_true[1]->SetLineColor(kGreen);
+	t_reso_true[1]->Draw("same");
+
+	TLegend *leg3 = new TLegend();
+	leg3->AddEntry(t_reso_true[0], "V0A");
+	leg3->AddEntry(t_reso_true[1], "V0C");
+	leg3->AddEntry(t_reso_true[2], "V0P");
+	leg3->Draw();
+
+	t_reso_true[2]->GetXaxis()->SetRange(1,6);
 }
